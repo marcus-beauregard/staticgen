@@ -3,10 +3,22 @@
 # Copyright (C) 2026 Marcus Beauregard
 
 """A tiny static site generator: markdown posts + templates -> HTML."""
-import os, argparse
+import os, sys, re, argparse
 
 TITLE = "{{title}}"
 BODY = "{{body}}"
+
+def get_version():
+    """Read the project version from pyproject.toml (no dependencies)."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pyproject.toml")
+    try:
+        with open(path, encoding="utf-8") as f:
+            match = re.search(r'^version\s*=\s*"([^"]+)"', f.read(), re.M)
+        if match:
+            return match.group(1)
+    except OSError:
+        pass
+    return "unknown"
 
 def render(post_md, template):
     lines = post_md.strip().split("\n")
@@ -28,16 +40,22 @@ def main():
     ap.add_argument("src")
     ap.add_argument("out")
     ap.add_argument("--template", default="template.html")
+    ap.add_argument("--version", action="version", version=get_version())
     args = ap.parse_args()
-    tpl = open(args.template).read()
-    os.makedirs(args.out, exist_ok=True)
-    for fn in sorted(os.listdir(args.src)):
-        if not fn.endswith(".md"):
-            continue
-        html = render(open(os.path.join(args.src, fn)).read(), tpl)
-        open(os.path.join(args.out, fn[:-3] + ".html"), "w").write(html)
-        print("built", fn)
-    print("done")
+    try:
+        tpl = open(args.template).read()
+        os.makedirs(args.out, exist_ok=True)
+        for fn in sorted(os.listdir(args.src)):
+            if not fn.endswith(".md"):
+                continue
+            html = render(open(os.path.join(args.src, fn)).read(), tpl)
+            open(os.path.join(args.out, fn[:-3] + ".html"), "w").write(html)
+            print("built", fn)
+        print("done")
+    except Exception as exc:
+        print("error: {}: {}".format(type(exc).__name__, exc), file=sys.stderr)
+        return 1
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
