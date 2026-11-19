@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "marcus-staticgen"
+version = "0.1.0"
+description = "A no-dependency static site generator: markdown + templates to HTML"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Marcus Beauregard", email = "marcus.beauregard.developer@gmail.com" }]
+keywords = ["static-site-generator", "markdown", "cli"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/marcus-beauregard/staticgen"
+
+[project.scripts]
+staticgen = "gen:main"
