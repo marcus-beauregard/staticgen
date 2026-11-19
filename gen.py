@@ -2,6 +2,9 @@
 """A tiny static site generator: markdown posts + templates -> HTML."""
 import os, argparse
 
+TITLE = "{{title}}"
+BODY = "{{body}}"
+
 def render(post_md, template):
     lines = post_md.strip().split("\n")
     out = []
@@ -15,7 +18,7 @@ def render(post_md, template):
             out.append("<p>" + line + "</p>")
     body = "\n".join(out)
     title = lines[0].lstrip("# ").strip()
-    return template.replace("{{title}}", title).replace("{{body}}", body)
+    return template.replace(TITLE, title).replace(BODY, body)
 
 def main():
     ap = argparse.ArgumentParser()
