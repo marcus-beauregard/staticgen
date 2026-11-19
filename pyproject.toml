@@ -8,12 +8,12 @@ version = "0.1.0"
 description = "A no-dependency static site generator: markdown + templates to HTML"
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "MIT" }
+license = { text = "GPL-2.0-or-later" }
 authors = [{ name = "Marcus Beauregard", email = "marcus.beauregard.developer@gmail.com" }]
 keywords = ["static-site-generator", "markdown", "cli"]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
   "Operating System :: OS Independent",
 ]
 
