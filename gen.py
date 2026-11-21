@@ -46,9 +46,10 @@ def main():
         tpl = open(args.template).read()
         os.makedirs(args.out, exist_ok=True)
         for fn in sorted(os.listdir(args.src)):
-            if not fn.endswith(".md"):
+            path = os.path.join(args.src, fn)
+            if not fn.endswith(".md") or not os.path.isfile(path):
                 continue
-            html = render(open(os.path.join(args.src, fn)).read(), tpl)
+            html = render(open(path).read(), tpl)
             open(os.path.join(args.out, fn[:-3] + ".html"), "w").write(html)
             print("built", fn)
         print("done")

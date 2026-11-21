@@ -75,3 +75,26 @@ def test_version_prints_package_version(tmp_path):
     result = run("--version", cwd=tmp_path)
     assert result.returncode == 0, result.stderr
     assert "0.1.0" in result.stdout
+
+
+def test_md_named_directory_is_ignored(tmp_path):
+    src = make_src(tmp_path)
+    (src / "drafts.md").mkdir()
+    tpl = make_template(tmp_path)
+    out = tmp_path / "out"
+    result = run(src, out, "--template", tpl, cwd=tmp_path)
+    assert result.returncode == 0, result.stderr
+    assert "built hello.md" in result.stdout
+    assert "done" in result.stdout
+    assert sorted(p.name for p in out.iterdir()) == ["hello.html"]
+
+
+def test_non_markdown_files_and_directories_are_ignored(tmp_path):
+    src = make_src(tmp_path)
+    (src / "notes.txt").write_text("ignored")
+    (src / "archive").mkdir()
+    tpl = make_template(tmp_path)
+    out = tmp_path / "out"
+    result = run(src, out, "--template", tpl, cwd=tmp_path)
+    assert result.returncode == 0, result.stderr
+    assert sorted(p.name for p in out.iterdir()) == ["hello.html"]
