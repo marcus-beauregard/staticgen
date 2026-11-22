@@ -98,3 +98,15 @@ def test_non_markdown_files_and_directories_are_ignored(tmp_path):
     result = run(src, out, "--template", tpl, cwd=tmp_path)
     assert result.returncode == 0, result.stderr
     assert sorted(p.name for p in out.iterdir()) == ["hello.html"]
+
+
+def test_uppercase_md_extension_is_built(tmp_path):
+    src = make_src(tmp_path)
+    (src / "Notes.MD").write_text("# Notes\n\nUpper extension.\n")
+    tpl = make_template(tmp_path)
+    out = tmp_path / "out"
+    result = run(src, out, "--template", tpl, cwd=tmp_path)
+    assert result.returncode == 0, result.stderr
+    assert "built Notes.MD" in result.stdout
+    assert sorted(p.name for p in out.iterdir()) == ["Notes.html", "hello.html"]
+    assert "<h1>Notes</h1>" in (out / "Notes.html").read_text()

@@ -47,10 +47,11 @@ def main():
         os.makedirs(args.out, exist_ok=True)
         for fn in sorted(os.listdir(args.src)):
             path = os.path.join(args.src, fn)
-            if not fn.endswith(".md") or not os.path.isfile(path):
+            base, ext = os.path.splitext(fn)
+            if ext.lower() != ".md" or not os.path.isfile(path):
                 continue
             html = render(open(path).read(), tpl)
-            open(os.path.join(args.out, fn[:-3] + ".html"), "w").write(html)
+            open(os.path.join(args.out, base + ".html"), "w").write(html)
             print("built", fn)
         print("done")
     except Exception as exc:
