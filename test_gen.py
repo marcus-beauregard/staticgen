@@ -123,3 +123,19 @@ def test_uppercase_md_extension_is_built(tmp_path):
     assert "built Notes.MD" in result.stdout
     assert sorted(p.name for p in out.iterdir()) == ["Notes.html", "hello.html"]
     assert "<h1>Notes</h1>" in (out / "Notes.html").read_text()
+
+
+def test_output_collision_fails_without_overwriting(tmp_path):
+    tpl = make_template(tmp_path)
+    src = make_src(tmp_path)
+    (src / "hello.MD").write_text("# Upper\n\nUPPER body.\n")
+    out = tmp_path / "out"
+    result = run(src, out, "--template", tpl, cwd=tmp_path)
+    assert_clean_failure(result)
+    assert all(name in result.stderr for name in ("hello.md", "hello.MD", "hello.html"))
+    assert "done" not in result.stdout
+    assert "UPPER body." in (out / "hello.html").read_text()
+    (src / "hello.MD").unlink()
+    result = run(src, out, "--template", tpl, cwd=tmp_path)
+    assert result.returncode == 0, result.stderr
+    assert "bold" in (out / "hello.html").read_text()
