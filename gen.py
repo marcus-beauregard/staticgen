@@ -45,11 +45,16 @@ def main():
     try:
         tpl = open(args.template).read()
         os.makedirs(args.out, exist_ok=True)
+        written = {}
         for fn in sorted(os.listdir(args.src)):
             path = os.path.join(args.src, fn)
             base, ext = os.path.splitext(fn)
             if ext.lower() != ".md" or not os.path.isfile(path):
                 continue
+            page = base + ".html"
+            if page in written:
+                raise ValueError("{} and {} both map to {}".format(written[page], fn, page))
+            written[page] = fn
             html = render(open(path).read(), tpl)
             open(os.path.join(args.out, base + ".html"), "w").write(html)
             print("built", fn)
