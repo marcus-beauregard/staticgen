@@ -45,13 +45,31 @@ def main():
     try:
         tpl = open(args.template).read()
         os.makedirs(args.out, exist_ok=True)
+        # First pass: collect the posts to build and detect output-name
+        # collisions before writing anything, so a build that cannot decide
+        # which post owns a page fails cleanly instead of silently dropping one.
+        posts = []
+        seen = {}
         for fn in sorted(os.listdir(args.src)):
             path = os.path.join(args.src, fn)
             base, ext = os.path.splitext(fn)
             if ext.lower() != ".md" or not os.path.isfile(path):
                 continue
+            target = base + ".html"
+            if target in seen:
+                print(
+                    "error: output collision: {} and {} both build to {}".format(
+                        seen[target], fn, target
+                    ),
+                    file=sys.stderr,
+                )
+                return 1
+            seen[target] = fn
+            posts.append((fn, path, target))
+        # Second pass: render and write each post.
+        for fn, path, target in posts:
             html = render(open(path).read(), tpl)
-            open(os.path.join(args.out, base + ".html"), "w").write(html)
+            open(os.path.join(args.out, target), "w").write(html)
             print("built", fn)
         print("done")
     except Exception as exc:
