@@ -123,3 +123,34 @@ def test_uppercase_md_extension_is_built(tmp_path):
     assert "built Notes.MD" in result.stdout
     assert sorted(p.name for p in out.iterdir()) == ["Notes.html", "hello.html"]
     assert "<h1>Notes</h1>" in (out / "Notes.html").read_text()
+
+
+def test_case_colliding_stems_fail_cleanly(tmp_path):
+    src = make_src(tmp_path)
+    (src / "hello.MD").write_text("# Upper\n\nUPPER body.\n")
+    tpl = make_template(tmp_path)
+    out = tmp_path / "out"
+    result = run(src, out, "--template", tpl, cwd=tmp_path)
+    assert_clean_failure(result)
+    # The collision message names both source files and the page they collide on.
+    assert "hello.md" in result.stderr
+    assert "hello.MD" in result.stderr
+    assert "hello.html" in result.stderr
+    # No page is written when the build cannot decide which post owns it.
+    assert not (out / "hello.html").exists()
+
+
+def test_removing_collision_builds_successfully(tmp_path):
+    src = make_src(tmp_path)
+    (src / "hello.MD").write_text("# Upper\n\nUPPER body.\n")
+    tpl = make_template(tmp_path)
+    out = tmp_path / "out"
+    # First build collides and fails.
+    first = run(src, out, "--template", tpl, cwd=tmp_path)
+    assert first.returncode == 1, first.stderr
+    # Removing the colliding file lets the build succeed.
+    (src / "hello.MD").unlink()
+    second = run(src, out, "--template", tpl, cwd=tmp_path)
+    assert second.returncode == 0, second.stderr
+    assert (out / "hello.html").exists()
+    assert "<h1>Hello</h1>" in (out / "hello.html").read_text()
